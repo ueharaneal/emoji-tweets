@@ -1,18 +1,22 @@
-import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
 
-import { env } from "~/env";
-import * as schema from "./schema";
+import { pgTable, serial, text, varchar} from 'drizzle-orm/pg-core'
+export const user = pgTable('user', {
+  id: serial('id').primaryKey(),
+  fullName: text('full_name'),
+  phone: varchar('phone', { length: 256 })
+})
+import { drizzle } from 'drizzle-orm/postgres-js'
+import postgres from 'postgres'
+import { users } from './schema'
+import { env } from '../../env'
 
-/**
- * Cache the database connection in development. This avoids creating a new connection on every HMR
- * update.
- */
-const globalForDb = globalThis as unknown as {
-  conn: postgres.Sql | undefined;
-};
+const connectionString = env.DATABASE_URL
 
-const conn = globalForDb.conn ?? postgres(env.DATABASE_URL);
-if (env.NODE_ENV !== "production") globalForDb.conn = conn;
+const client = postgres(connectionString)
+const db = drizzle(client);
 
-export const db = drizzle(conn, { schema });
+const allUsers = await db.select().from(users);
+console.log(allUsers)
+if(allUsers.length ==0){
+  console.log('ummmm')
+}
