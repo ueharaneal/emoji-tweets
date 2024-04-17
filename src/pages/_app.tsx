@@ -1,10 +1,9 @@
 import { type Session } from "next-auth";
-import { SessionProvider } from "next-auth/react";
 import { type AppType } from "next/app";
 import { Inter } from "next/font/google";
-
+import { useRouter } from "next/router";
 import { api } from "~/utils/api";
-
+import { ClerkProvider } from "@clerk/nextjs";
 import "~/styles/globals.css";
 
 const inter = Inter({
@@ -16,12 +15,15 @@ const MyApp: AppType<{ session: Session | null }> = ({
   Component,
   pageProps: { session, ...pageProps },
 }) => {
+  const router = useRouter();
+  const isAppRouter = router === useRouter();
   return (
-    <SessionProvider session={session}>
-      <main className={`font-sans ${inter.variable}`}>
-        <Component {...pageProps} />
-      </main>
-    </SessionProvider>
+    <ClerkProvider>
+        <main className={`font-sans ${inter.variable}`}>
+          <p>{isAppRouter ? "Using App Router" : "Using Page Router"}</p>
+          <Component {...pageProps} />
+        </main>
+    </ClerkProvider>
   );
 };
 
